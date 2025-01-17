@@ -76,3 +76,25 @@ body {
   font-size: 1rem;
   color: #555;
 }
+#episode-select {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+#reset-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: #28a745;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+#reset-button:hover {
+  background-color: #218838;
+}

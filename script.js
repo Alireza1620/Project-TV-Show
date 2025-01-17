@@ -2,6 +2,7 @@ function setup() {
   const allEpisodes = getAllEpisodes();
   makePageForEpisodes(allEpisodes);
   setupSearch(allEpisodes);
+  setupEpisodeSelector(allEpisodes);
 }
 
 function makePageForEpisodes(episodeList) {
@@ -19,6 +20,10 @@ function makePageForEpisodes(episodeList) {
         aria-label="Search episodes"
       />
       <button id="search-button">Search</button>
+      <select id="episode-select">
+        <option value="">Select an episode...</option>
+      </select>
+      <button id="reset-button" style="display: none;">Show All Episodes</button>
       <p id="search-result-count"></p>
     </div>
   `;
@@ -48,7 +53,8 @@ function makePageForEpisodes(episodeList) {
 
   rootElem.appendChild(episodesContainer);
 
-  // Update the results count
+  // Populate dropdown and results count
+  populateEpisodeSelector(episodeList);
   updateSearchResultCount(episodeList.length, episodeList.length);
 }
 
@@ -74,6 +80,45 @@ function setupSearch(allEpisodes) {
   };
 
   searchButton.addEventListener("click", searchEpisodes);
+}
+
+function setupEpisodeSelector(allEpisodes) {
+  const episodeSelect = document.getElementById("episode-select");
+  const resetButton = document.getElementById("reset-button");
+
+  episodeSelect.addEventListener("change", (event) => {
+    const selectedValue = event.target.value;
+
+    if (selectedValue === "") {
+      makePageForEpisodes(allEpisodes);
+      resetButton.style.display = "none";
+      return;
+    }
+
+    const [selectedSeason, selectedEpisode] = selectedValue.split("-").map(Number);
+    const selectedEpisodeData = allEpisodes.find(
+      (episode) =>
+        episode.season === selectedSeason && episode.number === selectedEpisode
+    );
+
+    makePageForEpisodes([selectedEpisodeData]);
+    resetButton.style.display = "inline";
+  });
+
+  resetButton.addEventListener("click", () => {
+    makePageForEpisodes(allEpisodes);
+    resetButton.style.display = "none";
+  });
+}
+
+function populateEpisodeSelector(episodeList) {
+  const episodeSelect = document.getElementById("episode-select");
+  episodeList.forEach((episode) => {
+    const option = document.createElement("option");
+    option.value = `${episode.season}-${episode.number}`;
+    option.textContent = `${formatEpisodeCode(episode.season, episode.number)} - ${episode.name}`;
+    episodeSelect.appendChild(option);
+  });
 }
 
 function updateSearchResultCount(matchCount, totalEpisodes) {
