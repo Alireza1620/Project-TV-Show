@@ -1,50 +1,80 @@
-//You can edit ALL of the code here
 function setup() {
   const allEpisodes = getAllEpisodes();
   makePageForEpisodes(allEpisodes);
+  setupSearch(allEpisodes);
 }
 
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
-  rootElem.innerHTML = ""; // Clear previous content
-
-  // Create a container for all episodes
   const episodesContainer = document.createElement("div");
   episodesContainer.className = "episodes-container";
 
+  // Clear previous content
+  rootElem.innerHTML = `
+    <div id="search-container">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search episodes..."
+        aria-label="Search episodes"
+      />
+      <p id="search-result-count"></p>
+    </div>
+  `;
+
   episodeList.forEach((episode) => {
-    // Create a container for each episode
     const episodeCard = document.createElement("div");
     episodeCard.className = "episode-card";
 
-    // Create and append episode title
     const title = document.createElement("h2");
-    title.textContent = `${episode.name} - ${formatEpisodeCode(episode.season, episode.number)}`;
+    title.textContent = `${episode.name} - ${formatEpisodeCode(
+      episode.season,
+      episode.number
+    )}`;
     episodeCard.appendChild(title);
 
-    // Create and append episode image
     const image = document.createElement("img");
     image.src = episode.image.medium;
     image.alt = `${episode.name} image`;
     episodeCard.appendChild(image);
 
-    // Create and append episode summary
     const summary = document.createElement("p");
     summary.innerHTML = episode.summary; // Use innerHTML to retain formatting
     episodeCard.appendChild(summary);
 
-    // Append episode card to the container
     episodesContainer.appendChild(episodeCard);
   });
 
-  // Append the container to the root element
   rootElem.appendChild(episodesContainer);
+
+  // Update the results count
+  updateSearchResultCount(episodeList.length, episodeList.length);
 }
 
-// Helper function to format episode code
 function formatEpisodeCode(season, number) {
   return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
 }
 
+function setupSearch(allEpisodes) {
+  const searchInput = document.getElementById("search-input");
+
+  searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredEpisodes = allEpisodes.filter((episode) => {
+      return (
+        episode.name.toLowerCase().includes(searchTerm) ||
+        episode.summary.toLowerCase().includes(searchTerm)
+      );
+    });
+
+    makePageForEpisodes(filteredEpisodes);
+    updateSearchResultCount(filteredEpisodes.length, allEpisodes.length);
+  });
+}
+
+function updateSearchResultCount(matchCount, totalEpisodes) {
+  const resultCountElem = document.getElementById("search-result-count");
+  resultCountElem.textContent = `Displaying ${matchCount} out of ${totalEpisodes} episode(s)`;
+}
 
 window.onload = setup;
