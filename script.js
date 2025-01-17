@@ -18,6 +18,7 @@ function makePageForEpisodes(episodeList) {
         placeholder="Search episodes..."
         aria-label="Search episodes"
       />
+      <button id="search-button">Search</button>
       <p id="search-result-count"></p>
     </div>
   `;
@@ -57,8 +58,9 @@ function formatEpisodeCode(season, number) {
 
 function setupSearch(allEpisodes) {
   const searchInput = document.getElementById("search-input");
+  const searchButton = document.getElementById("search-button");
 
-  searchInput.addEventListener("input", () => {
+  const searchEpisodes = () => {
     const searchTerm = searchInput.value.toLowerCase();
     const filteredEpisodes = allEpisodes.filter((episode) => {
       return (
@@ -69,7 +71,9 @@ function setupSearch(allEpisodes) {
 
     makePageForEpisodes(filteredEpisodes);
     updateSearchResultCount(filteredEpisodes.length, allEpisodes.length);
-  });
+  };
+
+  searchButton.addEventListener("click", searchEpisodes);
 }
 
 function updateSearchResultCount(matchCount, totalEpisodes) {
