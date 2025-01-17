@@ -1,3 +1,45 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
 #root {
-  color: red;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.episodes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.episode-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.episode-card img {
+  width: 100%;
+  height: auto;
+}
+
+.episode-card h2 {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.episode-card p {
+  font-size: 0.9rem;
+  padding: 10px;
 }
