@@ -14,7 +14,7 @@
     <script>
       let allEpisodes = [];
 
-      // Function to fetch the episodes data
+      // Fetch episodes from TVMaze API
       function fetchEpisodes() {
         return fetch('https://api.tvmaze.com/shows/82/episodes')
           .then(response => {
@@ -29,7 +29,7 @@
           });
       }
 
-      // Display an error message to the user
+      // Show an error message if data fails to load
       function showError(error) {
         const rootElem = document.getElementById("root");
         rootElem.innerHTML = `
@@ -40,7 +40,7 @@
         `;
       }
 
-      // Setup function to initialize the page
+      // Set up the page after data is loaded
       function setup() {
         const rootElem = document.getElementById("root");
         rootElem.innerHTML = '<p>Loading episodes...</p>'; // Show loading message
@@ -52,7 +52,7 @@
           });
       }
 
-      // Make the page display the episodes
+      // Function to render the episodes on the page
       function makePageForEpisodes(episodeList) {
         const rootElem = document.getElementById("root");
         rootElem.innerHTML = `
@@ -69,12 +69,41 @@
         `;
         populateEpisodes(episodeList);
         populateEpisodeSelect(episodeList);
+
+        // Event listener for the search button
+        document.getElementById('search-button').addEventListener('click', () => {
+          const searchQuery = document.getElementById('search-input').value.toLowerCase();
+          const filteredEpisodes = allEpisodes.filter(episode => 
+            episode.name.toLowerCase().includes(searchQuery) || episode.summary.toLowerCase().includes(searchQuery)
+          );
+          makePageForEpisodes(filteredEpisodes);
+        });
+
+        // Event listener for the select dropdown to show the selected episode
+        document.getElementById('episode-select').addEventListener('change', (event) => {
+          const selectedValue = event.target.value;
+          const selectedEpisode = allEpisodes.find(episode => 
+            `S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}` === selectedValue
+          );
+          
+          if (selectedEpisode) {
+            makePageForEpisodes([selectedEpisode]);
+          }
+        });
+
+        // Event listener for the reset button to show all episodes again
+        document.getElementById('reset-button').addEventListener('click', () => {
+          makePageForEpisodes(allEpisodes);
+          document.getElementById('search-input').value = '';
+          document.getElementById('search-result-count').textContent = `Showing ${allEpisodes.length} episodes`;
+          document.getElementById('reset-button').style.display = 'none';
+        });
       }
 
-      // Populate the list of episodes on the page
+      // Populate the list of episodes
       function populateEpisodes(episodeList) {
         const episodeListElem = document.getElementById("episode-list");
-        episodeListElem.innerHTML = ''; // Clear the list
+        episodeListElem.innerHTML = ''; // Clear previous content
 
         episodeList.forEach(episode => {
           const episodeElem = document.createElement("li");
@@ -99,35 +128,6 @@
           episodeSelectElem.appendChild(optionElem);
         });
       }
-
-      // Event listener for the search functionality
-      document.getElementById('search-button').addEventListener('click', () => {
-        const searchQuery = document.getElementById('search-input').value.toLowerCase();
-        const filteredEpisodes = allEpisodes.filter(episode => 
-          episode.name.toLowerCase().includes(searchQuery) || episode.summary.toLowerCase().includes(searchQuery)
-        );
-        makePageForEpisodes(filteredEpisodes);
-      });
-
-      // Event listener for the select dropdown to show the selected episode
-      document.getElementById('episode-select').addEventListener('change', (event) => {
-        const selectedValue = event.target.value;
-        const selectedEpisode = allEpisodes.find(episode => 
-          `S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}` === selectedValue
-        );
-        
-        if (selectedEpisode) {
-          makePageForEpisodes([selectedEpisode]);
-        }
-      });
-
-      // Event listener for the reset button to show all episodes again
-      document.getElementById('reset-button').addEventListener('click', () => {
-        makePageForEpisodes(allEpisodes);
-        document.getElementById('search-input').value = '';
-        document.getElementById('search-result-count').textContent = `Showing ${allEpisodes.length} episodes`;
-        document.getElementById('reset-button').style.display = 'none';
-      });
 
       // Initialize the page when it loads
       window.onload = setup;
