@@ -1,11 +1,15 @@
-let allEpisodes = [];
+let allShows = [];
+let cachedEpisodes = new Map();
+let currentShowEpisodes = [];
 
-// Fetch episodes from TVMaze API
-function fetchEpisodes() {
-  return fetch("https://api.tvmaze.com/shows/82/episodes")
+/**
+ * Fetch all shows and cache them.
+ */
+function fetchShows() {
+  return fetch("https://api.tvmaze.com/shows")
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Failed to fetch shows.");
       }
       return response.json();
     })
@@ -15,86 +19,144 @@ function fetchEpisodes() {
     });
 }
 
-// Show an error message if data fails to load
+/**
+ * Fetch episodes for a specific show by ID.
+ */
+function fetchEpisodesForShow(showId) {
+  if (cachedEpisodes.has(showId)) {
+    return Promise.resolve(cachedEpisodes.get(showId));
+  }
+  return fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch episodes for show ID: ${showId}`);
+      }
+      return response.json();
+    })
+    .then((episodes) => {
+      cachedEpisodes.set(showId, episodes);
+      return episodes;
+    })
+    .catch((error) => {
+      showError(error);
+      throw error;
+    });
+}
+
+/**
+ * Show an error message.
+ */
 function showError(error) {
   const rootElem = document.getElementById("root");
   rootElem.innerHTML = `
     <div>
-      <p>There was an error loading the episodes. Please try again later.</p>
+      <p>There was an error loading data. Please try again later.</p>
       <p>Error details: ${error.message}</p>
     </div>
   `;
 }
 
-function setup() {
-  const rootElem = document.getElementById("root");
-  rootElem.innerHTML = '<p>Loading episodes...</p>';
-
-  fetchEpisodes().then((episodes) => {
-    allEpisodes = episodes;
-    initializePage(allEpisodes);
+/**
+ * Populate the search bar.
+ */
+function setupSearchBar() {
+  const searchBar = document.getElementById("search-bar");
+  searchBar.addEventListener("input", (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    const filteredShows = allShows.filter((show) =>
+      show.name.toLowerCase().includes(searchTerm)
+    );
+    renderShowBanners(filteredShows);
   });
 }
 
-// Initialize the page
-function initializePage(episodes) {
-  createSearchUI();
-  makePageForEpisodes(episodes);
-  setupSearch();
-  setupEpisodeSelector();
-}
+/**
+ * Render show banners on the page.
+ */
+function renderShowBanners(shows) {
+  const bannerContainer = document.querySelector(".banner-container");
+  bannerContainer.innerHTML = "";
 
-// Create the static search UI
-function createSearchUI() {
-  const rootElem = document.getElementById("root");
-  rootElem.innerHTML = `
-    <div id="search-container">
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Search episodes..."
-        aria-label="Search episodes"
-      />
-      <button id="search-button">Search</button>
-      <select id="episode-select">
-        <option value="">Select an episode...</option>
-      </select>
-      <button id="reset-button" style="display: none;">Show All Episodes</button>
-      <p id="search-result-count"></p>
-    </div>
-    <div id="episodes-container"></div>
-  `;
+  shows.forEach((show) => {
+    const banner = document.createElement("div");
+    banner.className = "show-banner";
+
+    const title = document.createElement("h2");
+    title.textContent = show.name;
+    banner.appendChild(title);
+
+    if (show.image && show.image.medium) {
+      const image = document.createElement("img");
+      image.src = show.image.medium;
+      image.alt = `${show.name} image`;
+      banner.appendChild(image);
+    }
+
+    const button = document.createElement("button");
+    button.textContent = "View Episodes";
+    button.addEventListener("click", () => {
+      loadEpisodesForShow(show.id);
+    });
+    banner.appendChild(button);
+
+    bannerContainer.appendChild(banner);
+  });
 }
 
 /**
- * Function to create the page for episodes.
- * It takes an array of episode objects as input and creates the HTML elements for each episode.
- * 
- * @param {Array} episodeList - An array of episode objects.
+ * Load episodes for a specific show.
+ */
+function loadEpisodesForShow(showId) {
+  fetchEpisodesForShow(showId).then((episodes) => {
+    currentShowEpisodes = episodes;
+    populateEpisodeSelector(episodes);
+    makePageForEpisodes(episodes);
+
+    // Hide the show banners and show the episode selector
+    document.querySelector(".banner-container").style.display = "none";
+    document.getElementById("show-selector").style.display = "none";
+    document.getElementById("episode-select").style.display = "inline-block";
+    document.getElementById("reset-button").style.display = "inline-block";
+  });
+}
+
+/**
+ * Populate the episode dropdown.
+ */
+function populateEpisodeSelector(episodes) {
+  const episodeSelector = document.getElementById("episode-select");
+  episodeSelector.innerHTML = '<option value="">Select an episode...</option>';
+  episodes.forEach((episode) => {
+    const option = document.createElement("option");
+    option.value = `${episode.season}-${episode.number}`;
+    option.textContent = `${formatEpisodeCode(episode.season, episode.number)} - ${episode.name}`;
+    episodeSelector.appendChild(option);
+  });
+
+  episodeSelector.addEventListener("change", (event) => {
+    const [season, number] = event.target.value.split("-");
+    const selectedEpisode = currentShowEpisodes.find(
+      (episode) => episode.season == season && episode.number == number
+    );
+    if (selectedEpisode) {
+      makePageForEpisodes([selectedEpisode]);
+    }
+  });
+}
+
+/**
+ * Format the episode code.
+ */
+function formatEpisodeCode(season, number) {
+  return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
+}
+
+/**
+ * Create episode cards.
  */
 function makePageForEpisodes(episodeList) {
-  const rootElem = document.getElementById("root");
-
-  // Retain the search container and clear only the episodes container
-  let episodesContainer = document.querySelector(".episodes-container");
-
-  if (!episodesContainer) {
-    episodesContainer = document.createElement("div");
-    episodesContainer.className = "episodes-container";
-    episodesContainer.style.display = "grid";
-    episodesContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
-    episodesContainer.style.gap = "16px";
-    episodesContainer.style.marginTop = "20px";
-    episodesContainer.style.padding = "10px";
-
-    // Append the container to the root only if it doesn't already exist
-    rootElem.appendChild(episodesContainer);
-  }
-
-  // Clear only the episodes content
+  const episodesContainer = document.querySelector(".episodes-container");
   episodesContainer.innerHTML = "";
-
-  // Create HTML elements for each episode
   episodeList.forEach((episode) => {
     const episodeCard = document.createElement("div");
     episodeCard.className = "episode-card";
@@ -104,119 +166,68 @@ function makePageForEpisodes(episodeList) {
     episodeCard.appendChild(title);
 
     const image = document.createElement("img");
-    image.src = episode.image.medium;
+    image.src = episode.image ? episode.image.medium : "";
     image.alt = `${episode.name} image`;
     episodeCard.appendChild(image);
 
     const summary = document.createElement("p");
-    summary.innerHTML = episode.summary;
+    summary.innerHTML = episode.summary || "No summary available.";
     episodeCard.appendChild(summary);
 
     episodesContainer.appendChild(episodeCard);
   });
-
-  // Update dropdown and search result count
-  populateEpisodeSelector(allEpisodes);
-  updateSearchResultCount(episodeList.length, allEpisodes.length);
 }
-
-
-
 
 /**
- * Function to format the episode code.
- * It takes the season and episode numbers as input and returns a formatted string.
- * 
- * @param {Number} season - The season number.
- * ```javascript
- * @param {Number} number - The episode number.
- * @returns {String} The formatted episode code.
+ * Reset the application state.
  */
-function formatEpisodeCode(season, number) {
-  return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
-}
-
-// Setup search functionality
-function setupSearch() {
-  const searchInput = document.getElementById("search-input");
-  const searchButton = document.getElementById("search-button");
+function resetApp() {
+  const showSelector = document.getElementById("show-selector");
+  const episodeSelector = document.getElementById("episode-select");
   const resetButton = document.getElementById("reset-button");
 
-  const searchEpisodes = () => {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filteredEpisodes = allEpisodes.filter(
-      (episode) =>
-        episode.name.toLowerCase().includes(searchTerm) ||
-        episode.summary.toLowerCase().includes(searchTerm)
-    );
+  // Show the banners and hide episode selector
+  document.querySelector(".banner-container").style.display = "flex";
+  showSelector.style.display = "inline-block";
+  episodeSelector.style.display = "none";
+  resetButton.style.display = "none";
 
-    makePageForEpisodes(filteredEpisodes);
-    resetButton.style.display = filteredEpisodes.length < allEpisodes.length ? "inline-block" : "none";
-  };
+  // Clear episodes container
+  const episodesContainer = document.querySelector(".episodes-container");
+  episodesContainer.innerHTML = "";
 
-  searchButton.addEventListener("click", searchEpisodes);
-
-  resetButton.addEventListener("click", () => {
-    searchInput.value = "";
-    makePageForEpisodes(allEpisodes);
-    resetButton.style.display = "none";
-  });
-}
-
-
-/**
- * Function to set up episode selector.
- * It takes an array of episode objects as input and sets up the episode selector event listener.
- * 
- * @param {Array} allEpisodes - An array of episode objects.
- */
-function setupEpisodeSelector() {
-  const episodeSelect = document.getElementById("episode-select");
-  const resetButton = document.getElementById("reset-button");
-
-  episodeSelect.addEventListener("change", (event) => {
-    const selectedValue = event.target.value;
-
-    if (selectedValue === "") {
-      makePageForEpisodes(allEpisodes);
-      resetButton.style.display = "none";
-      return;
-    }
-
-    const [selectedSeason, selectedEpisode] = selectedValue.split("-").map(Number);
-    const selectedEpisodeData = allEpisodes.find(
-      (episode) =>
-        episode.season === selectedSeason && episode.number === selectedEpisode
-    );
-
-    makePageForEpisodes([selectedEpisodeData]);
-    resetButton.style.display = "inline-block";
-  });
+  // Re-render all shows
+  renderShowBanners(allShows);
 }
 
 /**
- * Function to populate the episode selector dropdown.
- * It takes an array of episode objects as input and adds options to the dropdown.
- * 
- * @param {Array} episodeList - An array of episode objects.
+ * Initialize the application.
  */
-function populateEpisodeSelector(episodeList) {
-  const episodeSelect = document.getElementById("episode-select");
-  episodeSelect.innerHTML = '<option value="">Select an episode...</option>';
+function setup() {
+  const rootElem = document.getElementById("root");
+  rootElem.innerHTML = `
+    <div id="controls">
+      <input id="search-bar" type="text" placeholder="Search shows..." />
+      <select id="show-selector" style="display: none;"></select>
+      <select id="episode-select" style="display: none;"></select>
+      <button id="reset-button" style="display: none;">Reset</button>
+    </div>
+    <div class="banner-container"></div>
+    <div class="episodes-container"></div>
+  `;
 
-  episodeList.forEach((episode) => {
-    const option = document.createElement("option");
-    option.value = `${episode.season}-${episode.number}`;
-    option.textContent = `${formatEpisodeCode(episode.season, episode.number)} - ${episode.name}`;
-    episodeSelect.appendChild(option);
-  });
+  // Attach reset button event listener
+  document.getElementById("reset-button").addEventListener("click", resetApp);
+
+  // Fetch shows and setup the app
+  fetchShows()
+    .then((shows) => {
+      allShows = shows;
+      renderShowBanners(allShows);
+      setupSearchBar();
+    })
+    .catch(showError);
 }
 
-// Update the search result count
-function updateSearchResultCount(matchCount, totalEpisodes) {
-  const resultCountElem = document.getElementById("search-result-count");
-  resultCountElem.textContent = `Displaying ${matchCount} out of ${totalEpisodes} episode(s)`;
-}
-
-// Initialize the app
+// Initialize the app on window load
 window.onload = setup;
