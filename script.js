@@ -112,7 +112,8 @@ function loadEpisodesForShow(showId) {
     populateEpisodeSelector(episodes);
     makePageForEpisodes(episodes);
 
-    // Toggle dropdown visibility
+    // Hide the show banners and show the episode selector
+    document.querySelector(".banner-container").style.display = "none";
     document.getElementById("show-selector").style.display = "none";
     document.getElementById("episode-select").style.display = "inline-block";
     document.getElementById("reset-button").style.display = "inline-block";
@@ -185,13 +186,18 @@ function resetApp() {
   const episodeSelector = document.getElementById("episode-select");
   const resetButton = document.getElementById("reset-button");
 
+  // Show the banners and hide episode selector
+  document.querySelector(".banner-container").style.display = "flex";
   showSelector.style.display = "inline-block";
   episodeSelector.style.display = "none";
   resetButton.style.display = "none";
 
-  renderShowBanners(allShows);
+  // Clear episodes container
   const episodesContainer = document.querySelector(".episodes-container");
   episodesContainer.innerHTML = "";
+
+  // Re-render all shows
+  renderShowBanners(allShows);
 }
 
 /**
@@ -210,8 +216,10 @@ function setup() {
     <div class="episodes-container"></div>
   `;
 
+  // Attach reset button event listener
   document.getElementById("reset-button").addEventListener("click", resetApp);
 
+  // Fetch shows and setup the app
   fetchShows()
     .then((shows) => {
       allShows = shows;

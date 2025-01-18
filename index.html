@@ -10,21 +10,11 @@
 
   <body>
     <div id="root">
-      <div id="search-container">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search episodes..."
-          aria-label="Search episodes"
-        />
-        <button id="search-button">Search</button>
-        <select id="episode-select">
-          <option value="">Select an episode...</option>
-        </select>
-        <button id="reset-button">Show All Episodes</button>
-        <p id="search-result-count"></p>
-      </div>
+      <div class="banner-container"> <!-- Initially visible banners here --> </div>
+      <div class="episodes-container" style="display:none;"> <!-- Initially hidden episodes here --> </div>
+      <div id="controls" style="display:none;"> <!-- Controls for search and episode selector here --> </div>
     </div>
+    
     
     
 
