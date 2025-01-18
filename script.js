@@ -66,73 +66,60 @@ function createSearchUI() {
   `;
 }
 
-// Render the episodes on the page
+/**
+ * Function to create the page for episodes.
+ * It takes an array of episode objects as input and creates the HTML elements for each episode.
+ * 
+ * @param {Array} episodeList - An array of episode objects.
+ */
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
 
-  // Create a container for episodes
-  const episodesContainer = document.createElement("div");
-  episodesContainer.className = "episodes-container"; // Add this class for consistency
-  episodesContainer.style.display = "grid";
-  episodesContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
-  episodesContainer.style.gap = "16px";
-  episodesContainer.style.marginTop = "20px";
-  episodesContainer.style.padding = "10px";
+  // Retain the search container and clear only the episodes container
+  let episodesContainer = document.querySelector(".episodes-container");
 
-  // Clear previous content
-  rootElem.innerHTML = `
-    <div id="search-container">
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Search episodes..."
-        aria-label="Search episodes"
-      />
-      <button id="search-button">Search</button>
-      <select id="episode-select">
-        <option value="">Select an episode...</option>
-      </select>
-      <button id="reset-button" style="display: none;">Show All Episodes</button>
-      <p id="search-result-count"></p>
-    </div>
-  `;
+  if (!episodesContainer) {
+    episodesContainer = document.createElement("div");
+    episodesContainer.className = "episodes-container";
+    episodesContainer.style.display = "grid";
+    episodesContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
+    episodesContainer.style.gap = "16px";
+    episodesContainer.style.marginTop = "20px";
+    episodesContainer.style.padding = "10px";
+
+    // Append the container to the root only if it doesn't already exist
+    rootElem.appendChild(episodesContainer);
+  }
+
+  // Clear only the episodes content
+  episodesContainer.innerHTML = "";
 
   // Create HTML elements for each episode
   episodeList.forEach((episode) => {
-    // Create a container for the episode card
     const episodeCard = document.createElement("div");
     episodeCard.className = "episode-card";
 
-    // Create the title element
     const title = document.createElement("h2");
-    title.textContent = `${episode.name} - ${formatEpisodeCode(
-      episode.season,
-      episode.number
-    )}`;
+    title.textContent = `${episode.name} - ${formatEpisodeCode(episode.season, episode.number)}`;
     episodeCard.appendChild(title);
 
-    // Create the image element
     const image = document.createElement("img");
     image.src = episode.image.medium;
     image.alt = `${episode.name} image`;
     episodeCard.appendChild(image);
 
-    // Create the summary element
     const summary = document.createElement("p");
-    summary.innerHTML = episode.summary; // Use innerHTML to retain formatting
+    summary.innerHTML = episode.summary;
     episodeCard.appendChild(summary);
 
-    // Add the episode card to the episodes container
     episodesContainer.appendChild(episodeCard);
   });
 
-  // Add the episodes container to the root element
-  rootElem.appendChild(episodesContainer);
-
-  // Populate dropdown and results count
-  populateEpisodeSelector(episodeList);
-  updateSearchResultCount(episodeList.length, episodeList.length);
+  // Update dropdown and search result count
+  populateEpisodeSelector(allEpisodes);
+  updateSearchResultCount(episodeList.length, allEpisodes.length);
 }
+
 
 
 
