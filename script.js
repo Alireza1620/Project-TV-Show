@@ -98,7 +98,16 @@ function makePageForEpisodes(episodeList) {
   updateSearchResultCount(episodeList.length, allEpisodes.length);
 }
 
-// Format episode code as SXXEXX
+
+/**
+ * Function to format the episode code.
+ * It takes the season and episode numbers as input and returns a formatted string.
+ * 
+ * @param {Number} season - The season number.
+ * ```javascript
+ * @param {Number} number - The episode number.
+ * @returns {String} The formatted episode code.
+ */
 function formatEpisodeCode(season, number) {
   return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
 }
@@ -130,7 +139,13 @@ function setupSearch() {
   });
 }
 
-// Setup dropdown selector
+
+/**
+ * Function to set up episode selector.
+ * It takes an array of episode objects as input and sets up the episode selector event listener.
+ * 
+ * @param {Array} allEpisodes - An array of episode objects.
+ */
 function setupEpisodeSelector() {
   const episodeSelect = document.getElementById("episode-select");
   const resetButton = document.getElementById("reset-button");
@@ -155,7 +170,12 @@ function setupEpisodeSelector() {
   });
 }
 
-// Populate dropdown with episode options
+/**
+ * Function to populate the episode selector dropdown.
+ * It takes an array of episode objects as input and adds options to the dropdown.
+ * 
+ * @param {Array} episodeList - An array of episode objects.
+ */
 function populateEpisodeSelector(episodeList) {
   const episodeSelect = document.getElementById("episode-select");
   episodeSelect.innerHTML = '<option value="">Select an episode...</option>';
