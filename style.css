@@ -1,17 +1,98 @@
+/* General Reset */
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
   color: #333;
 }
 
 #root {
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
+/* Controls Section */
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#controls input,
+#controls select,
+#controls button {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+#controls button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+#controls button:hover {
+  background-color: #0056b3;
+}
+
+#controls input {
+  flex-grow: 1;
+  max-width: 300px;
+}
+
+/* Banner Section */
+.banner-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.show-banner {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  width: 250px;
+}
+
+.show-banner h2 {
+  font-size: 18px;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  margin: 0;
+}
+
+.show-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.show-banner button {
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.show-banner button:hover {
+  background-color: #218838;
+}
+
+/* Episodes Section */
 .episodes-container {
   display: flex;
   flex-wrap: wrap;
@@ -20,81 +101,45 @@ body {
 }
 
 .episode-card {
-  background: #fff;
+  background-color: white;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  width: 300px;
   text-align: center;
+}
+
+.episode-card h2 {
+  font-size: 18px;
+  padding: 10px;
+  background-color: #343a40;
+  color: white;
+  margin: 0;
 }
 
 .episode-card img {
   width: 100%;
   height: auto;
-}
-
-.episode-card h2 {
-  font-size: 1.2rem;
-  margin: 10px 0;
+  display: block;
 }
 
 .episode-card p {
-  font-size: 0.9rem;
-  padding: 10px;
-}
-
-#search-container {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-#search-input {
-  padding: 10px;
-  width: 70%;
-  max-width: 300px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-#search-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  color: white;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#search-button:hover {
-  background-color: #0056b3;
-}
-
-#search-result-count {
-  font-size: 1rem;
+  padding: 15px;
+  font-size: 14px;
+  line-height: 1.5;
   color: #555;
 }
-#episode-select {
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-left: 10px;
-}
 
-#reset-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  color: white;
-  background-color: #28a745;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+  #controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-#reset-button:hover {
-  background-color: #218838;
+  .show-banner,
+  .episode-card {
+    width: 100%;
+  }
 }
